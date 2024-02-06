@@ -29,6 +29,7 @@ const Chatbot = () => {
       setMaximize(false);
     }
   };
+  
   const toggleMaximize = () => {
     setMaximize(!isMaximize);
   };
@@ -36,30 +37,34 @@ const Chatbot = () => {
   const chatbotStyle = {
     width: isMaximize ? "90%" : "320px",
     height: isMaximize ? "85%" : "488px",
-    transition: "all 0.4s ease-in-out",
+    transition: "all 0.4s ease",
   };
 
   const chatboxContentStyle = {
     height: isMaximize ? "calc(100% - 100px)" : "calc(100% - 100px)",
+    transition: "all 0.4s ease",
   };
 
   return (
     <div>
-      <Button
-        variant="default"
-        onClick={toggleChatBot}
-        className={`bg-blue-500 h-14 border-0 rounded-full fixed right-10 bottom-10 ${
-          isChatbotOpen ? "animate-none" : "animate-bounce"
-        }`}
-      >
-        <span>
-          {isChatbotOpen ? <GrClose size={24} /> : <RiRobot2Fill size={24} />}
-        </span>
-      </Button>
+      <div>
+        <Button
+          variant="default"
+          onClick={toggleChatBot}
+          className={`bg-blue-500 h-14 border-0 rounded-full fixed right-10 bottom-10 ${
+            isChatbotOpen ? "animate-none" : "animate-pulse"
+          }`}
+        >
+          <span className={`duration-300 ${isChatbotOpen ? "rotate-180":"rotate-0"}`}>
+            {isChatbotOpen ? <GrClose size={24} /> : <RiRobot2Fill size={24} />}
+          </span>
+        </Button>
+      </div>
+
       {isChatbotOpen && (
         <div
+          className={`w-80 bg-white border border-gray-200 rounded-md fixed right-[80px] bottom-[100px] overflow-hidden shadow-xl transition-all transform origin-top-right`}
           style={chatbotStyle}
-          className={`w-80 bg-white border border-gray-200 rounded-md fixed right-[80px] bottom-[100px] overflow-hidden shadow-xl`}
         >
           <header className="text-center p-2 border-b-2 rounded-t-md flex justify-between items-center">
             <div className="relative flex justify-start items-center gap-2">
