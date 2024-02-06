@@ -123,7 +123,7 @@ const Chatbot = () => {
               placeholder="Enter message..."
               onChange={handleTextChange}
               value={messageText}
-              className="border rounded-full bg-gray-200 border-gray-400 h-10 w-full px-4 py-[5px] outline-none resize-none overflow-hidden transition-all"
+              className="border rounded-full bg-gray-200 border-gray-400 h-10 w-full px-4 py-[6px] outline-none resize-none overflow-hidden transition-all"
             ></textarea>
             {/* {enterMessage && ( */}
             <Button
