@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
 import { RiRobot2Fill } from "react-icons/ri";
 import { GrSend } from "react-icons/gr";
@@ -9,6 +9,8 @@ import { CgProfile } from "react-icons/cg";
 import { FiMinimize2 } from "react-icons/fi";
 import Messages from "../messages/Messages";
 import OpenAI from "openai";
+import { Skeleton } from "../ui/skeleton";
+import SkeletonLoader from "../skeleton/SkeletonLoader";
 
 const openAI = new OpenAI({
   apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
@@ -22,8 +24,22 @@ const AIChatBot = () => {
   const [chatHistory, setChatHistory] = useState([]);
   const [loading, isLoading] = useState(false);
 
+  const chatContainerRef = useRef(null);
+
+  const scrollToBottom = () => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
+    }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [chatHistory]);
+
   const handleUserInput = async () => {
     try {
+      isLoading(true);
       setChatHistory((prevChat) => [
         ...prevChat,
         { role: "user", content: userInput },
@@ -42,9 +58,17 @@ const AIChatBot = () => {
         },
       ]);
 
+      isLoading(false);
       setUserInput("");
     } catch (error) {
+      isLoading(false);
       console.error("Error during chat completion:", error);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleUserInput();
     }
   };
 
@@ -60,13 +84,14 @@ const AIChatBot = () => {
   };
 
   const chatbotStyle = {
-    width: isMaximize ? "90%" : "320px",
+    width: isMaximize ? "90%" : "350px",
     height: isMaximize ? "85%" : "488px",
     transition: "all 0.4s ease",
   };
 
   const chatboxContentStyle = {
     height: isMaximize ? "calc(100% - 100px)" : "calc(100% - 100px)",
+    fontSize: isMaximize ? "18px" : "13px",
     transition: "all 0.4s ease",
     overflowY: "auto",
   };
@@ -93,7 +118,7 @@ const AIChatBot = () => {
 
       {isChatbotOpen && (
         <div
-          className={`w-80 bg-white border border-gray-200 rounded-md fixed right-[80px] bottom-[100px] overflow-hidden shadow-xl transition-all transform origin-top-right`}
+          className={`bg-white border border-gray-200 rounded-md fixed right-[80px] bottom-[100px] overflow-hidden shadow-xl transition-all transform origin-top-right`}
           style={chatbotStyle}
         >
           <header className="text-center p-2 border-b-2 rounded-t-md flex justify-between items-center">
@@ -134,8 +159,8 @@ const AIChatBot = () => {
             </div>
           </header>
 
-          <div style={chatboxContentStyle}>
-            <ul className="p-2 text-sm">
+          <div style={chatboxContentStyle} ref={chatContainerRef}>
+            <ul className="p-2">
               {chatHistory.map((message, index) => (
                 <li
                   key={index}
@@ -143,31 +168,61 @@ const AIChatBot = () => {
                     message.role == "user" ? "justify-end" : "justify-start"
                   } p-1`}
                 >
-                  {message.role === "user" ? null : (
-                    <span className="min-w-[25px] min-h-[25px] bg-blue-500 text-white border rounded-full flex items-center justify-center self-end mr-1">
-                      <RiRobot2Fill />
-                    </span>
+                  {message.role === "user" ? (
+                    <>
+                      <p
+                        className={`p-2 whitespace-normal bg-blue-500 text-white rounded-t-xl rounded-bl-xl break-all hyphens-auto ${
+                          isMaximize ? "max-w-[700px] p-4" : "max-w-56"
+                        }`}
+                      >
+                        {message.content}
+                      </p>
+                      <span
+                        className={`min-w-[25px] min-h-[25px] bg-gray-200 text-gray-500 border rounded-full flex items-center justify-center self-end ml-1 ${
+                          isMaximize
+                            ? "min-w-[35px] min-h-[35px]"
+                            : "min-w-[26px] min-h-[25px]"
+                        }`}
+                      >
+                        <CgProfile size={18}/>
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span
+                        className={` bg-blue-500 text-white border rounded-full flex items-center justify-center self-end mr-1 ${
+                          isMaximize
+                            ? "min-w-[35px] min-h-[35px]"
+                            : "min-w-[26px] min-h-[25px]"
+                        }`}
+                      >
+                        <RiRobot2Fill size={16}/>
+                      </span>
+                      <p
+                        className={`p-2 whitespace-normal border bg-gray-200 rounded-t-xl rounded-br-xl hyphens-auto ${
+                          isMaximize ? "max-w-[700px] p-4" : "max-w-56"
+                        }`}
+                      >
+                        {message.content}
+                      </p>
+                    </>
                   )}
-
-                  <p
-                    className={`px-2 py-1 whitespace-normal ${
-                      message.role == "user"
-                        ? "bg-blue-500 text-white rounded-t-xl rounded-bl-xl"
-                        : "border bg-gray-200 rounded-t-xl rounded-br-xl"
-                    }`}
-                  >
-                    {message.content}
-                  </p>
                 </li>
               ))}
+              {loading && (
+                <div key={chatHistory.length}>
+                  <SkeletonLoader />
+                </div>
+              )}
             </ul>
           </div>
 
-          <div className="relative bottom-[10px] flex justify-between gap-1 p-2 border-t-[1px] bg-slate-50">
+          <div className="relative bottom-[10px] flex justify-between gap-1 p-2 border-t-[1px] bg-white">
             <input
               type="text"
               placeholder="Enter message..."
               onChange={(e) => setUserInput(e.target.value)}
+              onKeyDown={handleKeyDown}
               value={userInput}
               className="border rounded-full bg-gray-200 border-gray-400 h-10 w-full px-4 py-[6px] outline-none resize-none overflow-hidden transition-all"
             ></input>
