@@ -160,13 +160,13 @@ const AIChatBot = () => {
           </header>
 
           <div style={chatboxContentStyle} ref={chatContainerRef}>
-            <ul className="p-2">
+            <ul className="px-1 py-1">
               {chatHistory.map((message, index) => (
                 <li
                   key={index}
                   className={`flex ${
                     message.role == "user" ? "justify-end" : "justify-start"
-                  } p-1`}
+                  } px-1 py-1 mb-1`}
                 >
                   {message.role === "user" ? (
                     <>
